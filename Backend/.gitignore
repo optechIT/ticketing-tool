@@ -1,0 +1,53 @@
+# 🔐 Environment files
+.env
+*.env
+.django.env
+*.django.env
+
+# 🐍 Python cache (ALL folders recursively)
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# 📦 Virtual environments
+env/
+venv/
+ENV/
+.venv/
+
+# 🧾 Django migrations (ignore ALL migrations folders everywhere)
+**/migrations/
+!**/migrations/__init__.py
+
+# 🗃️ SQLite DB (if used)
+db.sqlite3
+db.sqlite3-journal
+
+# 📁 Media & static (optional)
+media/
+staticfiles/
+
+# 🔧 Logs
+*.log
+
+# 🧪 Coverage / testing
+.coverage
+htmlcov/
+.pytest_cache/
+
+# 🧠 IDE / Editor
+.vscode/
+.idea/
+
+# 🖥️ OS files
+.DS_Store
+Thumbs.db
+
+# 🔐 Secrets
+*.pem
+*.key
+
+# 🐳 Docker (optional)
+*.pid
+*.seed
