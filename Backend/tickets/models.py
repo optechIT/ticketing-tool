@@ -8,6 +8,18 @@ from django.conf import settings
 import uuid
 import os
 
+
+from datetime import datetime
+
+
+from TicketingTool.utils.snowflake_id_generator import SnowflakeIDGenerator
+
+snowflake_id_ticket_obj = SnowflakeIDGenerator()
+
+
+
+
+
 def ticket_attachment_upload_path(instance, filename):
     ext = filename.split('.')[-1]
 
@@ -42,14 +54,45 @@ class Ticket(models.Model):
     description = models.TextField()
 
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    assigned_to = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='assigned_tickets')
+    assigned_to = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,blank=True, null=True, related_name='assigned_tickets')
 
     is_deleted = models.BooleanField(default=False)
-    deleted_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT,related_name='deleted_tickets')
+    deleted_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT,null=True,blank=True, related_name='deleted_tickets')
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+
+    def generate_ticket_code(self):
+        # 🔹 Prefix
+        if self.ticket_type == 'INCIDENT':
+            prefix = 'INC'
+        else :
+            prefix = 'SRV'
+
+
+        # 🔹 Date (YYMM)
+        now = datetime.now()
+        date_part = now.strftime('%y%m')
+
+        # 🔹 Short UUID (6 chars)
+        unique_part = uuid.uuid4().hex[:6].upper()
+
+        return f"{prefix}-{date_part}-{unique_part}"
+
+
+    def save(self, *args, **kwargs):
+        # Only generate if not already set
+        if not self.ticket_code:
+            self.ticket_code = self.generate_ticket_code()
+
+
+        if not self.id:
+            self.id = snowflake_id_ticket_obj.generate_id()
+        
+        self.full_clean()
+
+        super().save(*args, **kwargs)
 
 
 
@@ -156,3 +199,5 @@ class Attachment(models.Model):
 
     def __str__(self):
         return f"{self.file.name}"
+    
+
